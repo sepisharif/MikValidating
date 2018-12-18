@@ -128,7 +128,7 @@ GOUTgenotypeQCindividualspassedQC<-GOUTgenotypeQC %>% select(PATIENT,GENECHIPSTA
 
 GOUTgenotypeQCindividualspassedQC%>% select(DIABETES) %>% table(.,useNA ='always')
 ```
-####RDDataset was extracted from BCSNPmax (n=577), RDVariables is the dataset just
+####RDDataset was extracted from BCSNPmax (n=577), RDVariables (n=576) is the dataset just
 ###includes  T2D variables and the criteria of T2D in this dataset needed to come out of some columns and that is RDVariables with one patient less than 18 which already filtered in Excel, RDLess18 was filterred individuals less than 18 yearsold (n=1), RDVariablesNoNa was filtered NA( no information for T2D, n= 17),RDVariablesNoNaLess18 is the RDDataset after filterring for the age<18 and NA for T2D (n=559).  
 ```{r}
 RDVariables<-read.delim("../Data/RDVariables.txt"   , header = T, na.strings = c(""," ","NA"))
@@ -184,7 +184,7 @@ RDgenotypeQCindividualspassedQC<-RDgenotypeQC %>% select(PATIENT,GENECHIPSTATUS,
 RDgenotypeQCindividualspassedQC%>% select(DIABETES) %>% table(.,useNA ='always')
 
 ```
-####NPHDataset was extracted from BCSNPmax (n=596),NPHVariables is the dataset just includes  T2D variables and the criteria of T2D, NPHLess18 was filterred individuals less than 18 yearsold (n=1), NPHVariablesNoNa was filtered NA( no information for T2D, n= 21),NPHVariablesNoNaLess18 is the NPHDataset after filterring for the age<18 and NA for T2D (n=575).  
+####NPHDataset was extracted from BCSNPmax (n=596),NPHVariables is the dataset just includes  T2D variables and the criteria of T2D, NPHLess18 was filterred individuals less than 18 yearsold (n=1), NPHVariablesNoNa was filtered NA( no information for T2D, n= 21),NPHVariablesNoNaLess18 is the NPHDataset after filterring for the age<18 and NA for T2D (n=574).  
 ```{r}
 NPHVDataset<-read.delim("../Data/NPH.txt"    , header = T, na.strings = c(""," ","NA"))
 
@@ -197,7 +197,7 @@ NPHVariablesNoNa<-NPHVariables%>% filter(is.na(DIABETES))
 NPHVariablesNoNaLess18<-NPHVariables%>% filter (AGECOL>=18)%>% filter(!is.na(DIABETES))
 
 ```
-####121 =T2DCase , 454= T2DControl in NPH dataset.454+121= 575 . Before filterrring for QC
+####121 =T2DCase , 453= T2DControl in NPH dataset.454+121= 575 . Before filterrring for QC
 ```{r}
 
 NPHVariablesNoNaLess18%>% select(DIABETES) %>% table(.,useNA ='always')
@@ -205,7 +205,7 @@ NPHVariablesNoNaLess18%>% select(DIABETES) %>% table(.,useNA ='always')
 ####merge with the QC dataset
 NPHgenotypeQC<-merge(NPHVariablesNoNaLess18,CoreExomeQCGenotypestatus, by= "PATIENT", all.x=T,all.y=F)
 ```
-####2= were sent. 324 patients werent sent for genotyping. 1= werenot sent. 250 patients werent sent for genotyping 
+####2= were sent. 324 patients were sent for genotyping. 1= werenot sent. 250 patients werent sent for genotyping 
 ```{r}
 NPHgenotypeQC%>% select(GENECHIPSTATUS) %>% table(.,useNA ='always')
 
@@ -221,7 +221,7 @@ NPHgenotypeQCindividualssentforgenotype<-NPHgenotypeQC %>% select(PATIENT,GENECH
 
 
 ```
-####305 patients passed genotyping. 324- 305= 19 patients faield QC
+####305 patients passed genotyping. 324- 306= 18 patients faield QC
 ```{r}
 NPHgenotypeQC%>% select(QCSTATUS) %>% table(.,useNA ='always')
 
@@ -235,7 +235,7 @@ NPHgenotypeQCindividualspassedQC<-NPHgenotypeQC %>% select(PATIENT,GENECHIPSTATU
                                                           SURICACID, EGFR,GENECHIPSTATUS,QCSTATUS )%>% 
   filter (QCSTATUS=="Passed Genotyping QC")
 ```
-####NPHT2DCase= 72 and control= 233 After QC
+####NPHT2DCase= 72 and control= 234 After QC
 ```{r}
 NPHgenotypeQCindividualspassedQC%>% select(DIABETES) %>% table(.,useNA ='always')
 

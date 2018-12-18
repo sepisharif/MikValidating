@@ -148,7 +148,8 @@ colnames(T2DRD)[15]<-"GOUTAFFSTAT"
 
 
 ```
-### rbinding the datasets and making the masterdatset
+### rbinding the datasets and making the masterdatset, 1040= T2DCase with duplications, 3408=
+###T2DControl with duplications
 ```{r }
 RenalGOUTDMDNPHataset<-rbind(T2DDM,T2DGOUT,T2DRD,T2DNPH)
 
@@ -156,17 +157,12 @@ write.table (RenalGOUTDMDNPHataset,"../Data/AllNewCleanDatawithduplications.txt"
 
 RenalGOUTDMDNPHataset%>% select(DIABETES) %>% table(., useNA='always') %>% cbind()
 ```
-####removing duplicated IDS(repeatedIDs), the output of this rbinding and removing duplications called "AllNewCleanData.txt". 4448 = Datasetbefore  filterring for duplications, 4309= dataset after filterring for duplications.
+####removing duplicated IDS(repeatedIDs), the output of this rbinding and removing duplications called "AllNewCleanData.txt". T2ControlduplicatedID= 3408-3369=39, T2DCaseduplicatedID= 1040-940=100
 ```{r }
 RenalGOUTDMDNPHatasetOrdered<-RenalGOUTDMDNPHataset[order(RenalGOUTDMDNPHataset$DIABETES),]
 
 RenalGOUTDMDNPHatasetNoDuplication<-RenalGOUTDMDNPHatasetOrdered[!duplicated(RenalGOUTDMDNPHatasetOrdered$PATIENT),]
 
-###d<-distinct(RenalGOUTDMDNPHataset)
-###d %>%select(DIABETES) %>% table(., useNA='always') %>% cbind()
-
-###b<-unique(RenalGOUTDMDNPHataset)
-###b%>%select(DIABETES) %>% table(., useNA='always') %>% cbind()
 
 RenalGOUTDMDNPHatasetNoDuplication%>% select(DIABETES) %>% table(., useNA='always') %>% cbind()
 ```
