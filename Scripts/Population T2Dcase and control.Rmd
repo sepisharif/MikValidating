@@ -1,0 +1,222 @@
+---
+title: "Population and T2D case"
+author: "Sepi Sharif"
+date: "9/27/2018"
+output: html_document
+---
+
+```{r }
+library(knitr)
+library(dplyr)
+library(narnia)
+```
+### "AllNewCleanData.txt" is the name of the master dataset made out of DM,RD,GOUT nadNPH datasets after filterring for NA, <18 years old, QCfaile and duplicated PATIENTID numbers.
+### 940= T2DCase for the master dateset, it comes out of 180(T2DCaseDM)+ 204 (T2DCaseGout)+ 204(T2DCaseRD)+ 72 (T2DCaseNPH) 1040 -100 (duplicated PATIENTIDs)= 940
+```{r }
+
+AllNewCleanDataset<-read.delim( "../Data/AllNewCleanData.txt"  , header=TRUE, na.strings=c("NA",""," "))
+AllNewCleanDataset%>% select(DIABETES) %>% table(., useNA='always') 
+```
+#### the name of the first column of the master dataset renamed to be matched with PCA datafile
+```{r }
+colnames(AllNewCleanDataset)[1]<-"PATIENTID"
+```
+### PCADataset
+```{r }
+ALLPCADATA<-read.delim( "../Data/PCAtestdata(1).txt"  , header=TRUE, na.strings=c("NA",""," "))
+```
+#### The masterdateset andPCA file merged to make the populations added to the datset
+```{r }
+AllNewCleanDatasetAndPCA<-merge(AllNewCleanDataset,ALLPCADATA,by="PATIENTID",all.x = T,all.y = F)
+
+```
+###Eastpolynesian population includind case and control after filterring for outliers 
+### 381(T2DCase)-369 (T2DCase after filterring for outliers)=12 outliers case
+###960 (T2DControl)- 945 (T2DControl after filterring for outliers)= 15 outliers
+```{r }
+EastPolynesiancasecontrol<-AllNewCleanDatasetAndPCA%>% filter(PCAETHBROAD=="East Polynesian")
+
+EastPolynesiancasecontrol%>% select (DIABETES) %>% table(., useNA='always')%>% cbind() 
+
+
+#outliers for East polynesian continous dataset
+
+vars2<-EastPolynesiancasecontrol[,c("AGECOL","WAIST","HEIGHT","WEIGHT","BMI","SYSTOLIC","AGECOL","DIASTOLIC","CHOLES","TRIGLY","HDL","LDL","COLHDL","SURICACID","EGFR")]
+
+vars2nooutlier<-EastPolynesiancasecontrol[,c("PATIENTID","WAIST","WEIGHT","HEIGHT","BMI","SYSTOLIC","AGECOL","DIASTOLIC","CHOLES","TRIGLY","HDL","LDL","COLHDL","SURICACID","EGFR")]
+
+
+
+j <- 0
+for (i in vars2){
+  j <- j+1
+  mn <- mean(i, na.rm=T)
+  ss <- sd(i, na.rm=T)
+  outliers <- i > (mn + 4*ss) | i < (mn - 4*ss)
+  table(outliers)
+  var_range <- c(min(mn - 4*ss, min(i, na.rm=T)),
+                 max(mn + 4*ss, max(i, na.rm=T)))
+  hist(i, xlim=var_range, main=names(vars2)[j])
+  abline(v = (mn + 4*ss))
+  abline(v = (mn - 4*ss))
+  abline(v =mn, col='blue')
+  cat(names(vars2)[j], "\n")
+  outliers %>%
+    which() %>% 
+    print()
+  cat('\n')
+}
+
+
+
+EastPolynesiancasecontrolNoOutlier<-EastPolynesiancasecontrol[-c(1191,153,453,344,648,801,1243,
+                                                                 127,922,1310,1054,309,630,904,945,962,1019,1048,1154,1230,1285,365,898,963,513,88,798),]
+
+
+EastPolynesiancasecontrolNoOutlier %>% select (DIABETES) %>% table(., useNA='always')%>% cbind() 
+```
+###Westpolynesian population includind case and control after filterring for outliers 
+### 200(T2DCase)-196 (T2DCase after filterring for outliers)=4 outliers case
+###601 (T2DControl)- 589 (T2DControl after filterring for outliers)= 12 outliers
+```{r }
+WestPolynesiancasecontrol<-AllNewCleanDatasetAndPCA%>% filter(PCAETHBROAD =="West Polynesian")
+
+WestPolynesiancasecontrol %>% select (DIABETES) %>% table(., useNA='always')%>% cbind() 
+
+#outliers for West polynesian continoud dataset
+
+vars3<-WestPolynesiancasecontrol[,c("AGECOL","WAIST","HEIGHT","WEIGHT","BMI","SYSTOLIC","DIASTOLIC","CHOLES","TRIGLY","HDL","LDL","COLHDL","SURICACID","EGFR")]
+vars3nooutlier<-WestPolynesiancasecontrol[,c("PATIENTID","WAIST","HEIGHT","WEIGHT","BMI","SYSTOLIC","AGECOL","DIASTOLIC","CHOLES","TRIGLY","HDL","LDL","COLHDL","SURICACID","EGFR")]
+
+
+j <- 0
+for (i in vars3){
+  j <- j+1
+  mn <- mean(i, na.rm=T)
+  ss <- sd(i, na.rm=T)
+  outliers <- i > (mn + 4*ss) | i < (mn - 4*ss)
+  table(outliers)
+  var_range <- c(min(mn - 4*ss, min(i, na.rm=T)),
+                 max(mn + 4*ss, max(i, na.rm=T)))
+  hist(i, xlim=var_range, main=names(vars3)[j])
+  abline(v = (mn + 4*ss))
+  abline(v = (mn - 4*ss))
+  abline(v =mn, col='blue')
+  cat(names(vars3)[j], "\n")
+  outliers %>%
+    which() %>% 
+    print()
+  cat('\n')
+}
+
+
+WestPolynesiancasecontrolNoOutlier<-WestPolynesiancasecontrol[-c(390,400,466,489,128,600,379,474,595,711,712,789,77,376,523,792),]
+
+
+WestPolynesiancasecontrolNoOutlier %>% select (DIABETES) %>% table(., useNA='always')%>% cbind() 
+
+```
+###European population includind case and control after filterring for outliers 
+### 263(T2DCase)-250 (T2DCase after filterring for outliers)=13 outliers case
+###1445 (T2DControl)- 1409 (T2DControl after filterring for outliers)= 36 outliers
+```{r }
+
+Europeancasecontrol<-AllNewCleanDatasetAndPCA %>% filter(PCAETHBROAD=="European")
+
+Europeancasecontrol %>% select (DIABETES) %>% table(., useNA='always')%>% cbind() 
+
+#outliers for European population continous dataset
+
+vars4<-Europeancasecontrol[,c("AGECOL","WAIST","HEIGHT","WEIGHT","BMI","SYSTOLIC","DIASTOLIC","CHOLES","TRIGLY","HDL","LDL","COLHDL","SURICACID","EGFR")]
+
+vars4nooutlier<-Europeancasecontrol[,c("PATIENTID","WAIST","HEIGHT","BMI","SYSTOLIC","AGECOL","DIASTOLIC","CHOLES","TRIGLY","HDL","LDL","COLHDL","SURICACID","EGFR")]
+
+j <- 0
+for (i in vars4){
+  j <- j+1
+  mn <- mean(i, na.rm=T)
+  ss <- sd(i, na.rm=T)
+  outliers <- i > (mn + 4*ss) | i < (mn - 4*ss)
+  table(outliers)
+  var_range <- c(min(mn - 4*ss, min(i, na.rm=T)),
+                 max(mn + 4*ss, max(i, na.rm=T)))
+  hist(i, xlim=var_range, main=names(vars4)[j])
+  abline(v = (mn + 4*ss))
+  abline(v = (mn - 4*ss))
+  abline(v =mn, col='blue')
+  cat(names(vars4)[j], "\n")
+  outliers %>%
+    which() %>% 
+    print()
+  cat('\n')
+}
+
+#finding PATIENTID to remove outliers
+
+
+EuropeancasecontrolNoOutlier<-Europeancasecontrol[-c(26,30,175,696,1515,548,784,1455,149,155,171,188,635,1173,1297,1613,1508,1529,1232,581,901,904,973,1051,1166,1191,1215,1282,1394,1421,1506,1557,1609,1683,536,937,1294,1594,1657,491,757,81,105,1194,1595,1616,1628,1650,1708
+                                                     ),]
+
+EuropeancasecontrolNoOutlier %>% select (DIABETES) %>% table(., useNA='always')%>% cbind()
+
+```
+###Mixedpolynesian population includind case and control after filterring for outliers 
+### 27(T2DCase)-26 (T2DCase after filterring for outliers)=1 outliers case
+###102 (T2DControl)- 98 (T2DControl after filterring for outliers)= 4 outliers
+```{r }
+
+Polynesiancasecontrol<-AllNewCleanDatasetAndPCA%>% filter(PCAETHBROAD =="Polynesian")
+
+Polynesiancasecontrol %>% select (DIABETES) %>% table(., useNA='always')%>% cbind()
+
+#outliers for  polynesian continoud dataset
+
+vars5<-Polynesiancasecontrol[,c("AGECOL","WAIST","HEIGHT","WEIGHT","BMI","SYSTOLIC","AGECOL","DIASTOLIC","CHOLES","TRIGLY","HDL","LDL","COLHDL","SURICACID","EGFR")]
+vars5nooutlier<-Polynesiancasecontrol[,c("PATIENTID","WAIST","HEIGHT","WEIGHT","BMI","SYSTOLIC","AGECOL","DIASTOLIC","CHOLES","TRIGLY","HDL","LDL","COLHDL","SURICACID","EGFR")]
+
+j <- 0
+for (i in vars5){
+  j <- j+1
+  mn <- mean(i, na.rm=T)
+  ss <- sd(i, na.rm=T)
+  outliers <- i > (mn + 4*ss) | i < (mn - 4*ss)
+  table(outliers)
+  var_range <- c(min(mn - 4*ss, min(i, na.rm=T)),
+                 max(mn + 4*ss, max(i, na.rm=T)))
+  hist(i, xlim=var_range, main=names(vars5)[j])
+  abline(v = (mn + 4*ss))
+  abline(v = (mn - 4*ss))
+  abline(v =mn, col='blue')
+  cat(names(vars5)[j], "\n")
+  outliers %>%
+    which() %>% 
+    print()
+  cat('\n')
+}
+
+#finding PATIENTID to remove outliers
+
+
+PolynesiancasecontrolNoOutlier<-Polynesiancasecontrol[-c(92,99,85,103,60),]
+
+
+
+PolynesiancasecontrolNoOutlier %>% select (DIABETES) %>% table(., useNA='always')%>% cbind()
+
+
+```
+##### n=328 is European and Non-polynesian ancestry for T2DCase, n= 1683 is European and Non-polynesian ancestry for T2DControl
+```{r}
+
+AllNewCleanDatasetAndPCA %>% select (PCAETHBROAD, DIABETES)  %>% table(., useNA='always') %>% cbind()
+
+```
+#### Different population T2D case and control with no duplications and outliers
+```{r}
+EastPolynesiancasecontrolNoOutlier%>% select(DIABETES) %>% table(., useNA='always') %>%cbind()
+WestPolynesiancasecontrolNoOutlier %>% select (DIABETES) %>% table(., useNA='always')%>% cbind()
+EuropeancasecontrolNoOutlier %>% select (DIABETES) %>% table(., useNA='always')%>% cbind()
+PolynesiancasecontrolNoOutlier %>% select (DIABETES) %>% table(., useNA='always') %>% cbind()
+
+```
+
