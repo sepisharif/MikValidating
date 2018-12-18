@@ -1,0 +1,176 @@
+---
+title: "Master dataset"
+output: html_document
+---
+####the T2D case and control for the four datasets after , age<18, NA for T2D, QC filterring QC are as belwo. They have been used to make the master dataset: DMgenotypeQCindividualspassedQC,GOUTgenotypeQCindividualspassedQC,RDgenotypeQCindividualspassedQC,NPHgenotypeQCindividualspassedQC.
+
+####T2DCase= 180, T2DControl= 58 for DMDatsetQCPassed which reads the DMgenotypeQCindividualspassedQC dataset (made after filterring for age<18, NA for T2D and QC) 
+```{r }
+library(dplyr)
+
+DMDatasetQCPassed<-read.delim("../Data/DMgenotypeQCindividualspassedQC.txt" , header = T, na.strings = c(""," ","NA"))
+
+DMDatasetQCPassed %>% select (DIABETES) %>% table()
+```
+### Making T2DCase and Control for DM dataset
+```{r }
+#T2DCase
+
+DMCase<-DMDatasetQCPassed %>% select (PATIENT,AGECOL,SEX,DIABETES,WEIGHT,HEIGHT,DIABETESTREAT,
+                                  HIBP,HEART,KIDNEY,WAIST,BMI,SYSTOLIC,DIASTOLIC,GOUTAFFSTAT,DIABINCULDEB,
+                                  CHOLES,TRIGLY,HDL,LDL,COLHDL,SURICACID,EGFR
+) %>% filter (DIABETES==2)
+
+
+
+#T2DControl
+
+DMControl<-DMDatasetQCPassed %>% select (PATIENT,AGECOL,SEX,DIABETES,WEIGHT,HEIGHT,DIABETESTREAT,
+                                      HIBP,HEART,KIDNEY,WAIST,BMI,SYSTOLIC,DIASTOLIC,GOUTAFFSTAT,DIABINCULDEB,
+                                      CHOLES,TRIGLY,HDL,LDL,COLHDL,SURICACID,EGFR
+) %>% filter (DIABETES==1)
+
+T2DDM<-rbind(DMCase, DMControl)
+
+```
+####3= borderline=maybe.  T2DCase= 584, T2DControl= 2970 for DMDatsetQCPassed which reads the GOUTgenotypeQCindividualspassedQC dataset (made after filterring for age<18, NA for T2D and QC
+```{r }
+GoutDatasetQCPassed<-read.delim("../Data/GOUTgenotypeQCindividualspassedQC.txt" , header = T, na.strings = c(""," ","NA"))
+GoutDatasetQCPassed %>% select (DIABETES) %>% table()
+
+```
+### Making T2DCase and Control separately for GOUT dataset
+```{r }
+GOUTData<-read.delim("../Data/GOUTgenotypeQCindividualspassedQC.txt"  , header=TRUE, na.strings=c("NA",""," "))
+
+GOUTCase<-GOUTData %>% select(PATIENT,AGECOL,SEX,DIABETES,WEIGHT,HEIGHT,DIABETESTREAT,
+                                      HIBP,HEART,KIDNEY,WAIST,BMI,SYSTOLIC,DIASTOLIC,GPGOUTAFFSTAT,GLUCMEASURED,
+                                      CHOLES,TRIGLY,HDL,LDL,COLHDL,SURICACID,EGFR_SCL
+) %>% filter (DIABETES==2)
+
+
+
+#T2DControl
+
+GOUTControl<-GOUTData %>% select(PATIENT,AGECOL,SEX,DIABETES,WEIGHT,HEIGHT,DIABETESTREAT,
+                              HIBP,HEART,KIDNEY,WAIST,BMI,SYSTOLIC,DIASTOLIC,GPGOUTAFFSTAT,GLUCMEASURED,
+                              CHOLES,TRIGLY,HDL,LDL,COLHDL,SURICACID,EGFR_SCL
+) %>% filter (DIABETES==1)
+
+T2DGOUT<-rbind(GOUTCase, GOUTControl)
+```
+#### T2DCase= 204, T2DControl= 146 for RrnalDatsetQCPassed which reads the RDenotypeQCindividualspassedQC dataset (made after filterring for age<18, NA for T2D and QC
+```{r }
+RenalDatasetQCPassed<-read.delim("../Data/RDgenotypeQCindividualspassedQC.txt" , header = T, na.strings = c(""," ","NA"))
+RenalDatasetQCPassed %>% select (DIABETES) %>% table()
+
+```
+### Making T2DCase and Control separately for RD dataset
+```{r }
+#T2DCase
+
+RenalData<-read.delim(  "../Data/RDgenotypeQCindividualspassedQC.txt"  , header=TRUE, na.strings=c("NA",""," "))
+
+
+RenalDataCase<-RenalData %>% select(PATIENT,AGECOL,SEX,DIABETES,WEIGHT,HEIGHT,INSULIN,
+                                                     HIBP,HEART,KIDNEY,WAIST,BMI,SYSTOLIC,DIASTOLIC,GOUTAFFSTAT,HBA1C ,
+                                                     CHOLES,TRIGLY,HDL,LDL,COLHDL,SURICACID,EGFR
+) %>% filter (DIABETES==2)
+
+
+
+#T2DControl
+
+RenalDataControl<-RenalData %>% select(PATIENT,AGECOL,SEX,DIABETES,WEIGHT,HEIGHT,INSULIN,
+                                    HIBP,HEART,KIDNEY,WAIST,BMI,SYSTOLIC,DIASTOLIC,GOUTAFFSTAT,HBA1C ,
+                                    CHOLES,TRIGLY,HDL,LDL,COLHDL,SURICACID,EGFR
+) %>% filter (DIABETES==1)
+
+T2DRD<-rbind(RenalDataCase, RenalDataControl)
+
+
+```
+#### T2DCase= 72, T2DControl= 234 for NPHDatsetQCPassed which reads the NPHgenotypeQCindividualspassedQC dataset (made after filterring for age<18, NA for T2D and QC
+```{r }
+NPHDatasetQCPassed<-read.delim("../Data/NPHgenotypeQCindividualspassedQC.txt" , header = T, na.strings = c(""," ","NA"))
+NPHDatasetQCPassed %>% select (DIABETES) %>% table()
+```
+### Making T2DCase and Control separately for NPH dataset
+```{r }
+#T2DCase
+
+NPHData<-read.delim( "../Data/NPHgenotypeQCindividualspassedQC.txt" , header=TRUE, na.strings=c("NA",""," "))
+
+
+NPHDataCase<-NPHData%>% select (PATIENT,AGECOL,SEX,DIABETES,WEIGHT,HEIGHT,DIABETESTREAT,
+                                HIBP,HEART,KIDNEY,WAIST,BMI,SYSTOLIC,DIASTOLIC,GOUTAFFSTAT,DIABINCULDEB,
+                                CHOLES,TRIGLY,HDL,LDL,COLHDL,SURICACID,EGFR
+) %>% filter (DIABETES==2)
+
+
+
+#T2DControl
+NPHDataControl<-NPHData%>% select (PATIENT,AGECOL,SEX,DIABETES,WEIGHT,HEIGHT,DIABETESTREAT,
+                                HIBP,HEART,KIDNEY,WAIST,BMI,SYSTOLIC,DIASTOLIC,GOUTAFFSTAT,DIABINCULDEB,
+                                CHOLES,TRIGLY,HDL,LDL,COLHDL,SURICACID,EGFR
+) %>% filter (DIABETES==1)
+
+
+T2DNPH<-rbind(NPHDataCase, NPHDataControl)
+
+```
+### Renaming the columns to be the same for rbinding
+```{r }
+##### making a masterdataset
+
+colnames(T2DDM)
+
+colnames(T2DGOUT)
+
+colnames(T2DRD)
+
+colnames(T2DNPH)
+
+
+
+colnames(T2DGOUT)[16] <- "DIABINCULDEB"
+
+colnames(T2DGOUT)[23] <- "EGFR"
+
+colnames(T2DGOUT)[15]<-"GOUTAFFSTAT"
+
+
+colnames(T2DNPH)[15]<-"GOUTAFFSTAT"
+
+colnames(T2DRD)[7]<-"DIABETESTREAT" 
+colnames(T2DRD)[16]<-"DIABINCULDEB"
+colnames(T2DRD)[15]<-"GOUTAFFSTAT"
+
+
+```
+### rbinding the datasets and making the masterdatset
+```{r }
+RenalGOUTDMDNPHataset<-rbind(T2DDM,T2DGOUT,T2DRD,T2DNPH)
+
+write.table (RenalGOUTDMDNPHataset,"../Data/AllNewCleanDatawithduplications.txt",sep="\t", row.names=F, quote = F)
+
+RenalGOUTDMDNPHataset%>% select(DIABETES) %>% table(., useNA='always') %>% cbind()
+```
+####removing duplicated IDS(repeatedIDs), the output of this rbinding and removing duplications called "AllNewCleanData.txt". 4448 = Datasetbefore  filterring for duplications, 4309= dataset after filterring for duplications.
+```{r }
+RenalGOUTDMDNPHatasetOrdered<-RenalGOUTDMDNPHataset[order(RenalGOUTDMDNPHataset$DIABETES),]
+
+RenalGOUTDMDNPHatasetNoDuplication<-RenalGOUTDMDNPHatasetOrdered[!duplicated(RenalGOUTDMDNPHatasetOrdered$PATIENT),]
+
+###d<-distinct(RenalGOUTDMDNPHataset)
+###d %>%select(DIABETES) %>% table(., useNA='always') %>% cbind()
+
+###b<-unique(RenalGOUTDMDNPHataset)
+###b%>%select(DIABETES) %>% table(., useNA='always') %>% cbind()
+
+RenalGOUTDMDNPHatasetNoDuplication%>% select(DIABETES) %>% table(., useNA='always') %>% cbind()
+```
+####RenalGOUTDMDNPHatasetNoDuplication exporting to Desktop and used as the "AllNewCleanData.txt" file for detecting ancestry populations with PCA.
+```{r }
+write.table (RenalGOUTDMDNPHatasetNoDuplication,"../Data/AllNewCleanData.txt",sep="\t", row.names=F, quote = F)
+```
