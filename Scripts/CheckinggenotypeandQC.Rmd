@@ -1,0 +1,264 @@
+---
+title: "Checking genotypandQC"
+output: html_document
+---
+
+######Human core exome phenotype file downloaded from  BCSNPmax,4 columns extracted from it  to evaluate the status of the genotypig for each individual, the column of SUBJECT chenged to PATIENT 
+```{r}
+library(dplyr)
+
+CoreExomeQCGenotypestatus<-read.delim("../Data/HumancoreexeomephenotypesBCSNPMAX.txt"  , header = T, na.strings = c(""," ","NA"))
+
+CoreExomeQCGenotypestatus<-CoreExomeQCGenotypestatus %>% select(SUBJECT, ALTID, GENECHIPSTATUS, QCSTATUS)
+
+colnames(CoreExomeQCGenotypestatus)[1]<-"PATIENT"
+
+```
+####DMDataset was extracted from BCSNPmax (n=746), DMVariables is the dataset includes just T2D variables, DMLess18 was filterred individuals less than 18 yearsold (n=6), DMVariablesNoNa was filtered NA( no information for T2D, n= 256),DMVariablesNoNaLess18 is the DMDataset after filterring for the age<18 and NA for T2D (n=485): 414 case, 71 control.  
+```{r}
+DMDataset<-read.delim("../Data/DMUSED.txt" , header = T, na.strings = c(""," ","NA"))
+
+DMVariables<-DMDataset %>% select(PATIENT, ALTID, AGECOL, SEX, DIABETES, WEIGHT, HEIGHT, DIABETESTREAT, HIBP, HEART, KIDNEY, WAIST, BMI, SYSTOLIC, DIASTOLIC, GOUTAFFSTAT, DIABINCULDEB, CHOLES, TRIGLY, HDL, LDL, COLHDL, SURICACID, EGFR)
+
+DMLess18<- DMVariables %>% filter (AGECOL<18)
+
+DMVariablesNoNa<-DMVariables%>% filter(is.na(DIABETES))
+
+DMVariablesNoNaLess18<-DMVariables%>% filter (AGECOL>=18)%>% filter(!is.na(DIABETES))
+
+```
+###414 (T2Dcase) + 71 (T2Dcontrol)= 485 before filterring for QC 
+```{r}
+DMVariablesNoNaLess18%>% select(DIABETES) %>% table(.,useNA ='always')
+
+###merge with the QC dataset
+
+DMgenotypeQC<-merge(DMVariablesNoNaLess18,CoreExomeQCGenotypestatus, by= "PATIENT", all.x=T,all.y=F)
+```
+####2= were sent to genotyping , 1= werent sent. 271 patients were sent for gentotyping, (people werent  sent for genotyping)= 205 +9= 214
+```{r}
+DMgenotypeQC%>% select(GENECHIPSTATUS) %>% table(.,useNA ='always')
+
+DMgenotypeQCindividualssentforgenotype<-DMgenotypeQC %>% select(PATIENT,GENECHIPSTATUS,
+                                                                AGECOL,SEX,
+                                                                DIABETES,WEIGHT,HEIGHT,
+                                                                DIABETESTREAT
+                                                                ,HIBP,HEART,KIDNEY,WAIST,BMI,
+                                                                SYSTOLIC,DIASTOLIC,GOUTAFFSTAT,
+                                                                DIABINCULDEB,CHOLES,TRIGLY,HDL,LDL,COLHDL, 
+                                                                SURICACID, EGFR,GENECHIPSTATUS,QCSTATUS )%>% 
+                                                       filter (GENECHIPSTATUS==2)
+
+```
+####238 patient passed genotyping, 271 (people were sent for genotyping)- 238 (passed Genotyping QC)= 33 (patients failed the  genotyping) 
+```{r}
+DMgenotypeQC%>% select(QCSTATUS) %>% table(.,useNA ='always')
+
+DMgenotypeQCindividualspassedQC<-DMgenotypeQC %>% select(PATIENT,GENECHIPSTATUS,
+                                                         AGECOL,SEX,
+                                                         DIABETES,WEIGHT,HEIGHT,
+                                                         DIABETESTREAT
+                                                         ,HIBP,HEART,KIDNEY,WAIST,BMI,
+                                                         SYSTOLIC,DIASTOLIC,GOUTAFFSTAT,
+                                                         DIABINCULDEB,CHOLES,TRIGLY,HDL,LDL,COLHDL, 
+                                                         SURICACID, EGFR,GENECHIPSTATUS,QCSTATUS )%>% 
+  filter (QCSTATUS=="Passed Genotyping QC")
+```
+###T2D case= 180 and control= 58 for DM dataset After QC
+```{r}
+DMgenotypeQCindividualspassedQC%>% select(DIABETES) %>% table(.,useNA ='always')
+
+```
+####GOUTDataset was extracted from BCSNPmax (n=5344), GOUTLess18 was filterred individuals less than 18 yearsold (n=11), GOUTVariablesNoNa was filtered NA( no information for T2D, n= 508),GOUTVariablesNoNaLess18 is the GOUTDataset after filterring for the age<18 and NA for T2D (n=4786). 
+```{r}
+GOUTDataset<-read.delim("../Data/GOUTUSED.txt" , header = T, na.strings = c(""," ","NA"))
+
+GOUTVariables<-GOUTDataset %>% select(SUBJECT, ALTID, AGECOL, SEX, DIABETES, WEIGHT, HEIGHT, DIABETESTREAT, HIBP, HEART, KIDNEY, WAIST, BMI, SYSTOLIC, DIASTOLIC, GPGOUTAFFSTAT, GLUCMEASURED, CHOLES, TRIGLY, HDL, LDL, COLHDL, SURICACID, EGFR_SCL )
+
+
+GOUTLess18<-GOUTVariables %>% filter (AGECOL<18)
+
+GOUTVariablesNoNa<-GOUTVariables%>% filter(is.na(DIABETES))
+
+GOUTVariablesNoNaLess18<-GOUTVariables%>% filter (AGECOL>=18)%>% filter(!is.na(DIABETES))
+
+```
+####4065= T2D control in GOUT dataset and 714= T2DCase in GOUT dataset 4065+714= 4779 Before filterring for QC. 3= Borderline for T2D it is not case n=7
+```{r}
+GOUTVariablesNoNaLess18%>% select(DIABETES) %>% table(.,useNA ='always')
+
+colnames(GOUTVariablesNoNaLess18)[1]<-"PATIENT"
+
+####merge with the QC dataset to check the QC status and the number of individuals were sent and were failed for genotyping.
+GOUTgenotypeQC<-merge(GOUTVariablesNoNaLess18,CoreExomeQCGenotypestatus, by= "PATIENT", all.x=T,all.y=F)
+
+```
+####2= sent for genotyping. 4143 patients were sent for gentotyping. 1= werent sent for genotyping.630 +13= 643 patients werenot sent for genotyping. 
+```{r}
+GOUTgenotypeQC%>% select(GENECHIPSTATUS) %>% table(.,useNA ='always')
+
+GOUTgenotypeQCindividualssentforgenotype<-GOUTgenotypeQC %>% select(PATIENT,GENECHIPSTATUS,
+                                                                AGECOL,SEX,
+                                                                DIABETES,WEIGHT,HEIGHT,
+                                                                DIABETESTREAT
+                                                                ,HIBP,HEART,KIDNEY,WAIST,BMI,
+                                                                SYSTOLIC,DIASTOLIC,GPGOUTAFFSTAT,
+                                                                GLUCMEASURED,CHOLES,TRIGLY,HDL,LDL,COLHDL, 
+ SURICACID, EGFR_SCL,GENECHIPSTATUS,QCSTATUS )%>% 
+  filter (GENECHIPSTATUS==2)
+
+```
+####3558 patient passed genotyping, 4143- 3558= 585 patients failed the  genotyping 
+```{r}
+
+GOUTgenotypeQC%>% select(QCSTATUS) %>% table(.,useNA ='always')
+
+GOUTgenotypeQCindividualspassedQC<-GOUTgenotypeQC %>% select(PATIENT,GENECHIPSTATUS,
+                                                             AGECOL,SEX,
+                                                             DIABETES,WEIGHT,HEIGHT,
+                                                             DIABETESTREAT
+                                                             ,HIBP,HEART,KIDNEY,WAIST,BMI,
+                                                             SYSTOLIC,DIASTOLIC,GPGOUTAFFSTAT,
+                                                             GLUCMEASURED,CHOLES,TRIGLY,HDL,LDL,COLHDL, 
+                                                             SURICACID, EGFR_SCL,GENECHIPSTATUS,QCSTATUS )%>% 
+  filter (QCSTATUS=="Passed Genotyping QC")
+```
+####584 =T2DCase , 2970= T2DControl in GOUT dataset After QC, 3 is not case and control they are borderline
+```{r}
+
+GOUTgenotypeQCindividualspassedQC%>% select(DIABETES) %>% table(.,useNA ='always')
+```
+####RDDataset was extracted from BCSNPmax (n=577), RDVariables is the dataset just
+###includes  T2D variables and the criteria of T2D in this dataset needed to come out of some columns and that is RDVariables with one patient less than 18 which already filtered in Excel, RDLess18 was filterred individuals less than 18 yearsold (n=1), RDVariablesNoNa was filtered NA( no information for T2D, n= 17),RDVariablesNoNaLess18 is the RDDataset after filterring for the age<18 and NA for T2D (n=559).  
+```{r}
+RDVariables<-read.delim("../Data/RDVariables.txt"   , header = T, na.strings = c(""," ","NA"))
+
+
+RDVariablesNoNa<-RDVariables%>% filter(is.na(DIABETES))
+
+RDVariablesNoNaLess18<-RDVariables%>%filter(!is.na(DIABETES))
+
+```
+####251= T2D control in RD dataset and 308= T2DCase in RD dataset, 308+251= 559 Befor filterring for QC 
+```{r}
+RDVariablesNoNaLess18%>% select(DIABETES) %>% table(.,useNA ='always')
+####merge with the QC dataset
+
+RDgenotypeQC<-merge(RDVariablesNoNaLess18,CoreExomeQCGenotypestatus, by= "PATIENT", all.x=T,all.y=F)
+```
+####2= were sent for genotyping. 370 patients were sent for gentotyping, 1= werent sent. 5 + 184= 189 patients were not sent for genotyping 
+```{r}
+
+RDgenotypeQC%>% select(GENECHIPSTATUS) %>% table(.,useNA ='always')
+
+RDgenotypeQCindividualssentforgenotype<-RDgenotypeQC %>% select(PATIENT,GENECHIPSTATUS,
+                                                                    AGECOL,SEX,
+                                                                    DIABETES,WEIGHT,HEIGHT,
+                                                                    INSULIN
+                                                                    ,HIBP,HEART,KIDNEY,WAIST,BMI,
+                                                                    SYSTOLIC,DIASTOLIC,GOUTAFFSTAT,
+                                                                    HBA1C,CHOLES,TRIGLY,HDL,LDL,COLHDL, 
+                                                                    SURICACID, EGFR,GENECHIPSTATUS,QCSTATUS )%>% 
+  filter (GENECHIPSTATUS==2)
+
+
+```
+####350 patient passed genotyping, 370- 350= 20 patients failed the  genotyping 
+```{r}
+
+RDgenotypeQC%>% select(QCSTATUS) %>% table(.,useNA ='always')
+
+RDgenotypeQCindividualspassedQC<-RDgenotypeQC %>% select(PATIENT,GENECHIPSTATUS,
+                                                             AGECOL,SEX,
+                                                             DIABETES,WEIGHT,HEIGHT,
+                                                             INSULIN
+                                                             ,HIBP,HEART,KIDNEY,WAIST,BMI,
+                                                             SYSTOLIC,DIASTOLIC,GOUTAFFSTAT,
+                                                             HBA1C,CHOLES,TRIGLY,HDL,LDL,COLHDL, 
+                                                             SURICACID, EGFR,GENECHIPSTATUS,QCSTATUS )%>% 
+  filter (QCSTATUS=="Passed Genotyping QC")
+
+```
+####T2DCase=204 and T2DControl=146 for RD dataset After QC
+```{r}
+RDgenotypeQCindividualspassedQC%>% select(DIABETES) %>% table(.,useNA ='always')
+
+```
+####NPHDataset was extracted from BCSNPmax (n=596),NPHVariables is the dataset just includes  T2D variables and the criteria of T2D, NPHLess18 was filterred individuals less than 18 yearsold (n=1), NPHVariablesNoNa was filtered NA( no information for T2D, n= 21),NPHVariablesNoNaLess18 is the NPHDataset after filterring for the age<18 and NA for T2D (n=575).  
+```{r}
+NPHVDataset<-read.delim("../Data/NPH.txt"    , header = T, na.strings = c(""," ","NA"))
+
+NPHVariables<-NPHVDataset %>% select(PATIENT, ALTID, AGECOL, SEX, DIABETES, WEIGHT, HEIGHT, DIABETESTREAT, HIBP, HEART, KIDNEY, WAIST, BMI, SYSTOLIC, DIASTOLIC, GOUTAFFSTAT, DIABINCULDEB, CHOLES, TRIGLY, HDL, LDL, COLHDL, SURICACID, EGFR)
+
+NPHLess18<-NPHVariables %>% filter (AGECOL<18)
+
+NPHVariablesNoNa<-NPHVariables%>% filter(is.na(DIABETES))
+
+NPHVariablesNoNaLess18<-NPHVariables%>% filter (AGECOL>=18)%>% filter(!is.na(DIABETES))
+
+```
+####121 =T2DCase , 454= T2DControl in NPH dataset.454+121= 575 . Before filterrring for QC
+```{r}
+
+NPHVariablesNoNaLess18%>% select(DIABETES) %>% table(.,useNA ='always')
+
+####merge with the QC dataset
+NPHgenotypeQC<-merge(NPHVariablesNoNaLess18,CoreExomeQCGenotypestatus, by= "PATIENT", all.x=T,all.y=F)
+```
+####2= were sent. 324 patients werent sent for genotyping. 1= werenot sent. 250 patients werent sent for genotyping 
+```{r}
+NPHgenotypeQC%>% select(GENECHIPSTATUS) %>% table(.,useNA ='always')
+
+NPHgenotypeQCindividualssentforgenotype<-NPHgenotypeQC %>% select(PATIENT,GENECHIPSTATUS,
+                                                                AGECOL,SEX,
+                                                                DIABETES,WEIGHT,HEIGHT,
+                                                                DIABETESTREAT
+                                                                ,HIBP,HEART,KIDNEY,WAIST,BMI,
+                                                                SYSTOLIC,DIASTOLIC, GOUTAFFSTAT,
+                                                                DIABINCULDEB,CHOLES,TRIGLY,HDL,LDL,COLHDL, 
+                                                                SURICACID, EGFR,GENECHIPSTATUS,QCSTATUS )%>% 
+  filter (GENECHIPSTATUS==2)
+
+
+```
+####305 patients passed genotyping. 324- 305= 19 patients faield QC
+```{r}
+NPHgenotypeQC%>% select(QCSTATUS) %>% table(.,useNA ='always')
+
+NPHgenotypeQCindividualspassedQC<-NPHgenotypeQC %>% select(PATIENT,GENECHIPSTATUS,
+                                                          AGECOL,SEX,
+                                                          DIABETES,WEIGHT,HEIGHT,
+                                                          DIABETESTREAT
+                                                          ,HIBP,HEART,KIDNEY,WAIST,BMI,
+                                                          SYSTOLIC,DIASTOLIC, GOUTAFFSTAT,
+                                                          DIABINCULDEB,CHOLES,TRIGLY,HDL,LDL,COLHDL, 
+                                                          SURICACID, EGFR,GENECHIPSTATUS,QCSTATUS )%>% 
+  filter (QCSTATUS=="Passed Genotyping QC")
+```
+####NPHT2DCase= 72 and control= 233 After QC
+```{r}
+NPHgenotypeQCindividualspassedQC%>% select(DIABETES) %>% table(.,useNA ='always')
+
+```
+####the T2D case and control for the four datasets after , age<18, NA for T2D, QC filterring QC are as belwo. They have been used to make the master dataset by exporting them on Desktop
+```{r}
+DMgenotypeQCindividualspassedQC%>% select(DIABETES) %>% table(.,useNA ='always')
+
+write.table (DMgenotypeQCindividualspassedQC,"../Data/DMgenotypeQCindividualspassedQC.txt", 
+             sep="\t", row.names=F, quote = F)
+
+GOUTgenotypeQCindividualspassedQC%>% select(DIABETES) %>% table(.,useNA ='always')
+
+write.table(GOUTgenotypeQCindividualspassedQC,"../Data/GOUTgenotypeQCindividualspassedQC.txt",sep="\t", row.names=F, quote = F)
+
+RDgenotypeQCindividualspassedQC%>% select(DIABETES) %>% table(.,useNA ='always')
+
+write.table (RDgenotypeQCindividualspassedQC,"../Data/RDgenotypeQCindividualspassedQC.txt",sep="\t", row.names=F,quote = F)
+
+NPHgenotypeQCindividualspassedQC%>% select(DIABETES) %>% table(.,useNA ='always')
+
+write.table (NPHgenotypeQCindividualspassedQC,"../Data/NPHgenotypeQCindividualspassedQC.txt",sep="\t", row.names=F, quote = F)
+```
+
+
+
